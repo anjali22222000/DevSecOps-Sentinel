@@ -19,7 +19,7 @@ jobs:
   gate-passes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: gate
         uses: ./
         with:
@@ -36,7 +36,7 @@ jobs:
   gate-blocks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - id: gate
         uses: ./
         continue-on-error: true
@@ -59,7 +59,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./
         continue-on-error: true
         with:

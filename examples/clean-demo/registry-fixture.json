@@ -1,0 +1,4 @@
+{
+  "_default": "found",
+  "npm:@acme-demo/auth": {"status": "not_found"}
+}

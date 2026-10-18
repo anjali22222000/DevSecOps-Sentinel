@@ -1,0 +1,832 @@
+{
+  "schema_version": "1.0",
+  "tool": {
+    "name": "devsecops-sentinel",
+    "version": "0.3.0"
+  },
+  "tool_version": "0.3.0",
+  "scan_root": "examples/vulnerable-demo",
+  "metadata": {
+    "generated_at": "2026-10-17T16:06:26+00:00",
+    "registry_mode": "fixture",
+    "registry_source": "registry-fixture.json",
+    "demo_data": true
+  },
+  "summary": {
+    "dependencies_total": 11,
+    "packages_assessed": 7,
+    "findings_total": 8,
+    "findings_by_severity": {
+      "SAFE": 2,
+      "MEDIUM": 1,
+      "HIGH": 3,
+      "CRITICAL": 2
+    },
+    "partial_assessments": 0,
+    "registry_lookups": {
+      "found": 6,
+      "not_found": 1,
+      "error": 0,
+      "skipped": 0
+    },
+    "scanner_errors": 0
+  },
+  "policy": {
+    "blocked": true,
+    "fail_on": "high",
+    "blocking_findings": [
+      "F001",
+      "F002",
+      "F003",
+      "F004",
+      "F005"
+    ],
+    "scanner_error": false,
+    "exit_code": 1,
+    "reasons": [
+      "5 finding(s) at or above HIGH"
+    ]
+  },
+  "config": {
+    "weights": {
+      "version": 0.4,
+      "scope": 0.3,
+      "similarity": 0.3
+    },
+    "scoring": {
+      "s_public_exists": 100.0,
+      "s_unclaimed": 70.0,
+      "floor_critical": 80.0,
+      "floor_high": 60.0,
+      "floor_medium": 30.0
+    },
+    "similarity": {
+      "algorithm": "damerau",
+      "min_length": 5,
+      "long_length": 8,
+      "max_distance_short": 1,
+      "max_distance_long": 2,
+      "high_similarity": 85.0,
+      "established_versions": 10,
+      "established_age_days": 730,
+      "allowlist": []
+    },
+    "policy": {
+      "fail_on": "high",
+      "block_on_incomplete": false
+    },
+    "registry": {
+      "timeout": 10.0,
+      "concurrency": 10
+    },
+    "privacy": {
+      "query_internal_names": true
+    },
+    "internal": {
+      "npm_scopes": [
+        "@acme-demo"
+      ],
+      "npm_packages": [],
+      "npm_prefixes": [],
+      "pypi_packages": [],
+      "pypi_prefixes": [
+        "acme-demo-"
+      ],
+      "owned_public": [],
+      "expected_versions": {
+        "npm:@acme-demo/auth": "1.4.0",
+        "pypi:acme-demo-reports": "3.0.0"
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "F001",
+      "rule_id": "SENT-DC-001",
+      "kind": "dependency",
+      "title": "Internal package name is exposed on a public registry",
+      "reason": "public registry has 99.0.0, higher than expected internal 1.4.0",
+      "ecosystem": "npm",
+      "package": "@acme-demo/auth",
+      "versions": [
+        "1.4.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 100.0,
+          "weight": 0.4,
+          "contribution": 40.0,
+          "note": "highest public version 99.0.0 > expected 1.4.0 (from sentinel.toml)"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 100.0,
+          "weight": 0.3,
+          "contribution": 30.0,
+          "note": "internal name is registered on the public registry and is not declared as owned by you"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "not applicable: internal names are not compared"
+        }
+      ],
+      "formula_score": 70.0,
+      "floor": 80.0,
+      "floor_reason": "public registry has 99.0.0, higher than expected internal 1.4.0",
+      "score": 80.0,
+      "severity": "CRITICAL",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:8 as 1.4.0",
+        "Declared in package-lock.json:10 as 1.4.0, resolved from https://npm.acme-demo.example/@acme-demo/auth/-/auth-1.4.0.tgz",
+        "Public registry: found; latest 99.0.0; 2 published version(s)",
+        "Declared internal in sentinel.toml"
+      ],
+      "limitations": [
+        "Public metadata cannot prove who owns a name; ownership comes from sentinel.toml."
+      ],
+      "recommendation": "Treat as a possible dependency-confusion exposure: confirm which registry served this package, pin the internal version with integrity hashes, make the package manager resolve this name only from your private registry, and reserve the name publicly.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 8
+        },
+        {
+          "file": "package-lock.json",
+          "line": 10
+        }
+      ]
+    },
+    {
+      "id": "F002",
+      "rule_id": "SENT-DC-001",
+      "kind": "dependency",
+      "title": "Internal package name is exposed on a public registry",
+      "reason": "internal package was resolved from public registry host registry.npmjs.org",
+      "ecosystem": "npm",
+      "package": "@acme-demo/billing",
+      "versions": [
+        "2.1.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "no public package exists, so there is no higher public version"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 70.0,
+          "weight": 0.3,
+          "contribution": 21.0,
+          "note": "no public package with this name; cannot confirm the name or scope is reserved by you"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "not applicable: internal names are not compared"
+        }
+      ],
+      "formula_score": 21.0,
+      "floor": 80.0,
+      "floor_reason": "internal package was resolved from public registry host registry.npmjs.org",
+      "score": 80.0,
+      "severity": "CRITICAL",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:9 as 2.1.0",
+        "Declared in package-lock.json:11 as 2.1.0, resolved from https://registry.npmjs.org/@acme-demo/billing/-/billing-2.1.0.tgz",
+        "Public registry: no package with this name (HTTP 404)",
+        "Declared internal in sentinel.toml"
+      ],
+      "limitations": [
+        "A 404 also occurs for private packages in a scope you own; public metadata cannot distinguish that from an unclaimed name.",
+        "Public metadata cannot prove who owns a name; ownership comes from sentinel.toml."
+      ],
+      "recommendation": "Treat as a possible dependency-confusion exposure: confirm which registry served this package, pin the internal version with integrity hashes, make the package manager resolve this name only from your private registry, and reserve the name publicly.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 9
+        },
+        {
+          "file": "package-lock.json",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "id": "F003",
+      "rule_id": "SENT-CFG-001",
+      "kind": "configuration",
+      "title": "Extra package index configured",
+      "reason": "pip merges all indexes and installs the highest version it finds; internal PyPI packages are declared in sentinel.toml",
+      "ecosystem": "pypi",
+      "package": null,
+      "versions": [],
+      "indicators": [],
+      "formula_score": null,
+      "floor": null,
+      "floor_reason": null,
+      "score": 65.0,
+      "severity": "HIGH",
+      "assessment": "complete",
+      "evidence": [
+        "extra-index-url https://pypi.acme-demo.example/simple (requirements.txt:1)",
+        "pip merges all indexes and installs the highest version it finds; internal PyPI packages are declared in sentinel.toml"
+      ],
+      "limitations": [
+        "Severity is rule-based, not computed by the weighted formula.",
+        "pip.conf, environment variables and .npmrc are not scanned."
+      ],
+      "recommendation": "Use a single --index-url (a proxy that serves internal and mirrored public packages) or pin hashes with --require-hashes.",
+      "locations": [
+        {
+          "file": "requirements.txt",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "F004",
+      "rule_id": "SENT-TS-001",
+      "kind": "dependency",
+      "title": "Package name closely resembles a well-known package",
+      "reason": "name resembles 'express' (87.5% similar)",
+      "ecosystem": "npm",
+      "package": "expresss",
+      "versions": [
+        "1.0.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 87.5,
+          "weight": 0.3,
+          "contribution": 26.25,
+          "note": "closest well-known name 'express': Damerau-Levenshtein distance 1, similarity 87.5%"
+        }
+      ],
+      "formula_score": 26.25,
+      "floor": 60.0,
+      "floor_reason": "name resembles 'express' (87.5% similar)",
+      "score": 60.0,
+      "severity": "HIGH",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:7 as 1.0.0",
+        "Declared in package-lock.json:9 as 1.0.0, resolved from https://registry.npmjs.org/expresss/-/expresss-1.0.0.tgz",
+        "Public registry: found; latest 1.0.0; 1 published version(s)",
+        "Resembles well-known package 'express' (distance 1, similarity 87.5%)"
+      ],
+      "limitations": [
+        "String similarity is evidence of resemblance, not proof of malicious intent."
+      ],
+      "recommendation": "Compare with 'express'. Check the publisher, repository link, creation date and download counts before installing. If it is legitimate, add it to similarity.allowlist.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 7
+        },
+        {
+          "file": "package-lock.json",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "id": "F005",
+      "rule_id": "SENT-TS-001",
+      "kind": "dependency",
+      "title": "Package name closely resembles a well-known package",
+      "reason": "name resembles 'requests' (87.5% similar)",
+      "ecosystem": "pypi",
+      "package": "reqeusts",
+      "versions": [
+        "2.31.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 87.5,
+          "weight": 0.3,
+          "contribution": 26.25,
+          "note": "closest well-known name 'requests': Damerau-Levenshtein distance 1, similarity 87.5%"
+        }
+      ],
+      "formula_score": 26.25,
+      "floor": 60.0,
+      "floor_reason": "name resembles 'requests' (87.5% similar)",
+      "score": 60.0,
+      "severity": "HIGH",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in requirements.txt:2 as 2.31.0",
+        "Public registry: found; latest 2.31.0; 1 published version(s)",
+        "Resembles well-known package 'requests' (distance 1, similarity 87.5%)"
+      ],
+      "limitations": [
+        "String similarity is evidence of resemblance, not proof of malicious intent."
+      ],
+      "recommendation": "Compare with 'requests'. Check the publisher, repository link, creation date and download counts before installing. If it is legitimate, add it to similarity.allowlist.",
+      "locations": [
+        {
+          "file": "requirements.txt",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "F006",
+      "rule_id": "SENT-DC-001",
+      "kind": "dependency",
+      "title": "Internal package name is exposed on a public registry",
+      "reason": "internal name is registered on the public registry and is not declared as owned by you",
+      "ecosystem": "pypi",
+      "package": "acme-demo-reports",
+      "versions": [
+        "3.0.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "highest public version 3.0.0 <= expected 3.0.0 (from sentinel.toml)"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 100.0,
+          "weight": 0.3,
+          "contribution": 30.0,
+          "note": "internal name is registered on the public registry and is not declared as owned by you"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "not applicable: internal names are not compared"
+        }
+      ],
+      "formula_score": 30.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 30.0,
+      "severity": "MEDIUM",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in requirements.txt:3 as 3.0.0",
+        "Public registry: found; latest 3.0.0; 1 published version(s)",
+        "Declared internal in sentinel.toml"
+      ],
+      "limitations": [
+        "Public metadata cannot prove who owns a name; ownership comes from sentinel.toml."
+      ],
+      "recommendation": "Treat as a possible dependency-confusion exposure: confirm which registry served this package, pin the internal version with integrity hashes, make the package manager resolve this name only from your private registry, and reserve the name publicly.",
+      "locations": [
+        {
+          "file": "requirements.txt",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "id": "F007",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "npm",
+      "package": "express",
+      "versions": [
+        "4.18.2"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "no close match among 137 well-known names"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:6 as 4.18.2",
+        "Declared in package-lock.json:8 as 4.18.2, resolved from https://registry.npmjs.org/express/-/express-4.18.2.tgz",
+        "Public registry: found; latest unknown; 0 published version(s)"
+      ],
+      "limitations": [],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 6
+        },
+        {
+          "file": "package-lock.json",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "id": "F008",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "pypi",
+      "package": "flask",
+      "versions": [
+        ">=2.3"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "no close match among 120 well-known names"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in requirements.txt:4 as >=2.3",
+        "Public registry: found; latest unknown; 0 published version(s)"
+      ],
+      "limitations": [],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "requirements.txt",
+          "line": 4
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "express",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "4.18.2",
+      "pinned_version": "4.18.2",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "expresss",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "1.0.0",
+      "pinned_version": "1.0.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "@acme-demo/auth",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "1.4.0",
+      "pinned_version": "1.4.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "@acme-demo/billing",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "2.1.0",
+      "pinned_version": "2.1.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "express",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "4.18.2",
+      "pinned_version": "4.18.2",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://registry.npmjs.org/express/-/express-4.18.2.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "expresss",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "1.0.0",
+      "pinned_version": "1.0.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://registry.npmjs.org/expresss/-/expresss-1.0.0.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "@acme-demo/auth",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "1.4.0",
+      "pinned_version": "1.4.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://npm.acme-demo.example/@acme-demo/auth/-/auth-1.4.0.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "@acme-demo/billing",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "2.1.0",
+      "pinned_version": "2.1.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://registry.npmjs.org/@acme-demo/billing/-/billing-2.1.0.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "reqeusts",
+      "ecosystem": "pypi",
+      "origin": "manifest",
+      "source_file": "requirements.txt",
+      "section": "requirements",
+      "version_spec": "==2.31.0",
+      "pinned_version": "2.31.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": 2
+    },
+    {
+      "name": "acme-demo-reports",
+      "ecosystem": "pypi",
+      "origin": "manifest",
+      "source_file": "requirements.txt",
+      "section": "requirements",
+      "version_spec": "==3.0.0",
+      "pinned_version": "3.0.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": 3
+    },
+    {
+      "name": "flask",
+      "ecosystem": "pypi",
+      "origin": "manifest",
+      "source_file": "requirements.txt",
+      "section": "requirements",
+      "version_spec": ">=2.3",
+      "pinned_version": null,
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": 4
+    }
+  ],
+  "registry_options": [
+    {
+      "kind": "extra-index-url",
+      "value": "https://pypi.acme-demo.example/simple",
+      "source_file": "requirements.txt",
+      "line": 1
+    }
+  ],
+  "registry_lookup": {
+    "enabled": true,
+    "results": [
+      {
+        "ecosystem": "npm",
+        "name": "@acme-demo/auth",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": "99.0.0",
+        "versions": [
+          "1.4.0",
+          "99.0.0"
+        ],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "npm",
+        "name": "@acme-demo/billing",
+        "status": "not_found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "npm",
+        "name": "express",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "npm",
+        "name": "expresss",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": "1.0.0",
+        "versions": [
+          "1.0.0"
+        ],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "pypi",
+        "name": "acme-demo-reports",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": "3.0.0",
+        "versions": [
+          "3.0.0"
+        ],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "pypi",
+        "name": "flask",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "pypi",
+        "name": "reqeusts",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": "2.31.0",
+        "versions": [
+          "2.31.0"
+        ],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      }
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}

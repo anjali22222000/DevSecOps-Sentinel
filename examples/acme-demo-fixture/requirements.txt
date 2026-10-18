@@ -1,0 +1,13 @@
+# acme-demo Python service (synthetic fixture)
+--index-url https://pypi.org/simple
+--extra-index-url https://user:not-a-real-secret@pypi.acme-demo.example/simple
+
+requests==2.31.0
+flask>=2.3,<3.0
+acme_demo.auth==1.4.0 \
+    --hash=sha256:deadbeef
+numpy ; python_version >= "3.9"
+python-dateutil>=2.8  # inline comment
+-e git+https://github.com/acme-demo/tools.git#egg=acme-demo-tools
+internal-lib @ https://downloads.acme-demo.example/internal_lib-0.3.0.tar.gz
+-r requirements-dev.txt

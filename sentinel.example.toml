@@ -1,0 +1,38 @@
+# Example Sentinel configuration. Copy to sentinel.toml in the project you scan.
+# Unknown keys are rejected on purpose: a typo in a security config must not be ignored.
+
+[policy]
+fail_on = "high"              # block at this severity or above: critical | high | medium | never
+block_on_incomplete = false   # also block when evidence is partial (e.g. registry checks not run)
+
+[weights]                     # Wv, Ws, Wt: must sum to 1.0
+version = 0.4
+scope = 0.3
+similarity = 0.3
+
+[internal.npm]
+scopes = ["@acme-demo"]       # every package under this scope is treated as internal
+packages = []                 # individual internal package names
+prefixes = []                 # name prefixes, e.g. "acme-"
+
+[internal.pypi]
+packages = []
+prefixes = ["acme-demo-"]     # PyPI has no scopes, so use name prefixes
+
+[internal]
+# Names or scopes YOU have reserved on the public registry (placeholder packages / owned scope).
+owned_public = ["npm:@acme-demo"]
+
+[internal.expected_versions]  # optional: the internal version a public release must not exceed
+"npm:@acme-demo/auth" = "1.4.0"
+
+[similarity]
+algorithm = "damerau"         # or "levenshtein" (the original proposal metric)
+allowlist = []                # legitimate names that merely resemble a popular package
+
+[privacy]
+query_internal_names = true   # false = never send internal names to public registries
+
+[registry]
+timeout = 10.0
+concurrency = 10

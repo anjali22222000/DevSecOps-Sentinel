@@ -1,0 +1,12 @@
+[policy]
+fail_on = "high"
+
+[internal.npm]
+scopes = ["@acme-demo"]
+
+[internal.pypi]
+prefixes = ["acme-demo-"]
+
+[internal.expected_versions]
+"npm:@acme-demo/auth" = "1.4.0"
+"pypi:acme-demo-reports" = "3.0.0"

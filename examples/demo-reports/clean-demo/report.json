@@ -1,0 +1,578 @@
+{
+  "schema_version": "1.0",
+  "tool": {
+    "name": "devsecops-sentinel",
+    "version": "0.3.0"
+  },
+  "tool_version": "0.3.0",
+  "scan_root": "examples/clean-demo",
+  "metadata": {
+    "generated_at": "2026-10-17T16:06:27+00:00",
+    "registry_mode": "fixture",
+    "registry_source": "registry-fixture.json",
+    "demo_data": true
+  },
+  "summary": {
+    "dependencies_total": 8,
+    "packages_assessed": 5,
+    "findings_total": 5,
+    "findings_by_severity": {
+      "SAFE": 5,
+      "MEDIUM": 0,
+      "HIGH": 0,
+      "CRITICAL": 0
+    },
+    "partial_assessments": 0,
+    "registry_lookups": {
+      "found": 4,
+      "not_found": 1,
+      "error": 0,
+      "skipped": 0
+    },
+    "scanner_errors": 0
+  },
+  "policy": {
+    "blocked": false,
+    "fail_on": "high",
+    "blocking_findings": [],
+    "scanner_error": false,
+    "exit_code": 0,
+    "reasons": [
+      "no findings at or above the blocking threshold"
+    ]
+  },
+  "config": {
+    "weights": {
+      "version": 0.4,
+      "scope": 0.3,
+      "similarity": 0.3
+    },
+    "scoring": {
+      "s_public_exists": 100.0,
+      "s_unclaimed": 70.0,
+      "floor_critical": 80.0,
+      "floor_high": 60.0,
+      "floor_medium": 30.0
+    },
+    "similarity": {
+      "algorithm": "damerau",
+      "min_length": 5,
+      "long_length": 8,
+      "max_distance_short": 1,
+      "max_distance_long": 2,
+      "high_similarity": 85.0,
+      "established_versions": 10,
+      "established_age_days": 730,
+      "allowlist": []
+    },
+    "policy": {
+      "fail_on": "high",
+      "block_on_incomplete": false
+    },
+    "registry": {
+      "timeout": 10.0,
+      "concurrency": 10
+    },
+    "privacy": {
+      "query_internal_names": true
+    },
+    "internal": {
+      "npm_scopes": [
+        "@acme-demo"
+      ],
+      "npm_packages": [],
+      "npm_prefixes": [],
+      "pypi_packages": [],
+      "pypi_prefixes": [],
+      "owned_public": [
+        "npm:@acme-demo"
+      ],
+      "expected_versions": {}
+    }
+  },
+  "findings": [
+    {
+      "id": "F001",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "npm",
+      "package": "@acme-demo/auth",
+      "versions": [
+        "1.4.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "no public package exists, so there is no higher public version"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name or scope is declared as reserved by you (internal.owned_public)"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "not applicable: internal names are not compared"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:8 as 1.4.0",
+        "Declared in package-lock.json:10 as 1.4.0, resolved from https://npm.acme-demo.example/@acme-demo/auth/-/auth-1.4.0.tgz",
+        "Public registry: no package with this name (HTTP 404)",
+        "Declared internal in sentinel.toml"
+      ],
+      "limitations": [
+        "Public metadata cannot prove who owns a name; ownership comes from sentinel.toml."
+      ],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 8
+        },
+        {
+          "file": "package-lock.json",
+          "line": 10
+        }
+      ]
+    },
+    {
+      "id": "F002",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "npm",
+      "package": "express",
+      "versions": [
+        "4.18.2"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "no close match among 137 well-known names"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:6 as 4.18.2",
+        "Declared in package-lock.json:8 as 4.18.2, resolved from https://registry.npmjs.org/express/-/express-4.18.2.tgz",
+        "Public registry: found; latest unknown; 0 published version(s)"
+      ],
+      "limitations": [],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 6
+        },
+        {
+          "file": "package-lock.json",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "id": "F003",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "pypi",
+      "package": "flask",
+      "versions": [
+        "2.3.3"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "no close match among 120 well-known names"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in requirements.txt:2 as 2.3.3",
+        "Public registry: found; latest unknown; 0 published version(s)"
+      ],
+      "limitations": [],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "requirements.txt",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "id": "F004",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "npm",
+      "package": "lodash",
+      "versions": [
+        "4.17.21"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "no close match among 137 well-known names"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in package.json:7 as 4.17.21",
+        "Declared in package-lock.json:9 as 4.17.21, resolved from https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz",
+        "Public registry: found; latest unknown; 0 published version(s)"
+      ],
+      "limitations": [],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "package.json",
+          "line": 7
+        },
+        {
+          "file": "package-lock.json",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "id": "F005",
+      "rule_id": null,
+      "kind": "dependency",
+      "title": "No risk indicators found",
+      "reason": "No risk indicators found",
+      "ecosystem": "pypi",
+      "package": "requests",
+      "versions": [
+        "2.31.0"
+      ],
+      "indicators": [
+        {
+          "key": "V",
+          "label": "Version mismatch",
+          "value": 0.0,
+          "weight": 0.4,
+          "contribution": 0.0,
+          "note": "not applicable: package is not declared internal"
+        },
+        {
+          "key": "S",
+          "label": "Unclaimed / unverified namespace",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "name exists on the public registry"
+        },
+        {
+          "key": "T",
+          "label": "Name similarity",
+          "value": 0.0,
+          "weight": 0.3,
+          "contribution": 0.0,
+          "note": "no close match among 120 well-known names"
+        }
+      ],
+      "formula_score": 0.0,
+      "floor": null,
+      "floor_reason": null,
+      "score": 0.0,
+      "severity": "SAFE",
+      "assessment": "complete",
+      "evidence": [
+        "Declared in requirements.txt:1 as 2.31.0",
+        "Public registry: found; latest unknown; 0 published version(s)"
+      ],
+      "limitations": [],
+      "recommendation": "No action needed for the evidence collected.",
+      "locations": [
+        {
+          "file": "requirements.txt",
+          "line": 1
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "express",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "4.18.2",
+      "pinned_version": "4.18.2",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "lodash",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "4.17.21",
+      "pinned_version": "4.17.21",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "@acme-demo/auth",
+      "ecosystem": "npm",
+      "origin": "manifest",
+      "source_file": "package.json",
+      "section": "dependencies",
+      "version_spec": "1.4.0",
+      "pinned_version": "1.4.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "express",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "4.18.2",
+      "pinned_version": "4.18.2",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://registry.npmjs.org/express/-/express-4.18.2.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "lodash",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "4.17.21",
+      "pinned_version": "4.17.21",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "@acme-demo/auth",
+      "ecosystem": "npm",
+      "origin": "lockfile",
+      "source_file": "package-lock.json",
+      "section": "lockfile",
+      "version_spec": "1.4.0",
+      "pinned_version": "1.4.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": "https://npm.acme-demo.example/@acme-demo/auth/-/auth-1.4.0.tgz",
+      "marker": null,
+      "editable": false,
+      "line": null
+    },
+    {
+      "name": "requests",
+      "ecosystem": "pypi",
+      "origin": "manifest",
+      "source_file": "requirements.txt",
+      "section": "requirements",
+      "version_spec": "==2.31.0",
+      "pinned_version": "2.31.0",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": 1
+    },
+    {
+      "name": "flask",
+      "ecosystem": "pypi",
+      "origin": "manifest",
+      "source_file": "requirements.txt",
+      "section": "requirements",
+      "version_spec": "==2.3.3",
+      "pinned_version": "2.3.3",
+      "source_type": "registry",
+      "alias": null,
+      "resolved_url": null,
+      "marker": null,
+      "editable": false,
+      "line": 2
+    }
+  ],
+  "registry_options": [],
+  "registry_lookup": {
+    "enabled": true,
+    "results": [
+      {
+        "ecosystem": "npm",
+        "name": "@acme-demo/auth",
+        "status": "not_found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "npm",
+        "name": "express",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "npm",
+        "name": "lodash",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "pypi",
+        "name": "flask",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      },
+      {
+        "ecosystem": "pypi",
+        "name": "requests",
+        "status": "found",
+        "registry_url": "fixture://registry-fixture.json",
+        "latest_version": null,
+        "versions": [],
+        "first_published": null,
+        "detail": null,
+        "attempts": 0
+      }
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}

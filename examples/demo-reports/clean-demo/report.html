@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel scan report</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--panel:#f6f8fa;
+--crit:#a40e26;--high:#bc4c00;--med:#9a6700;--safe:#1a7f37;--accent:#0969da}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;
+--panel:#161b22;--crit:#ff7b72;--high:#ffa657;--med:#e3b341;--safe:#56d364;--accent:#58a6ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.muted{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.banner{border:1px solid var(--line);border-left-width:4px;background:var(--panel);padding:10px 14px;margin:14px 0;border-radius:4px}
+.banner.blocked{border-left-color:var(--crit)}.banner.error{border-left-color:var(--high)}.banner.pass{border-left-color:var(--safe)}
+.banner.demo{border-left-color:var(--med)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:4px;padding:8px 12px;background:var(--panel)}
+.card b{display:block;font-size:20px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+.wrap{overflow-x:auto}
+.sev{font-weight:600;font-size:12px;white-space:nowrap}
+.sev::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:currentColor}
+.CRITICAL{color:var(--crit)}.HIGH{color:var(--high)}.MEDIUM{color:var(--med)}.SAFE{color:var(--safe)}
+details{border:1px solid var(--line);border-radius:4px;margin:8px 0;background:var(--bg)}
+summary{cursor:pointer;padding:8px 12px;background:var(--panel)}
+.body{padding:8px 12px}ul{margin:4px 0 8px 18px;padding:0}
+</style>
+</head>
+<body>
+<main>
+<h1>DevSecOps Sentinel scan report</h1>
+<div class="muted">Generated 2026-10-17T16:06:27+00:00 · scanner 0.3.0 · scan root <span class="mono">examples/clean-demo</span></div>
+
+<div class="banner pass"><b>Passed.</b> no findings at or above the blocking threshold.</div>
+<div class="banner demo"><b>Demo data.</b> Registry evidence came from a local fixture (registry-fixture.json), not from live registries.</div>
+
+<div class="cards">
+<div class="card"><b class="CRITICAL">0</b>CRITICAL</div>
+<div class="card"><b class="HIGH">0</b>HIGH</div>
+<div class="card"><b class="MEDIUM">0</b>MEDIUM</div>
+<div class="card"><b class="SAFE">5</b>SAFE</div>
+<div class="card"><b>8</b>dependency entries</div>
+<div class="card"><b>5</b>packages assessed</div>
+<div class="card"><b>0</b>partial assessments</div>
+<div class="card"><b>0</b>scanner errors</div>
+</div>
+
+<h2>Findings</h2>
+<div class="wrap"><table>
+<thead><tr><th>ID</th><th>Package / item</th><th>Ecosystem</th><th>Score</th><th>Severity</th><th>Assessment</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="mono">F001</td><td class="mono">@acme-demo/auth</td><td>npm</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+<tr><td class="mono">F002</td><td class="mono">express</td><td>npm</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+<tr><td class="mono">F003</td><td class="mono">flask</td><td>pypi</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+<tr><td class="mono">F004</td><td class="mono">lodash</td><td>npm</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+<tr><td class="mono">F005</td><td class="mono">requests</td><td>pypi</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+</tbody></table></div>
+
+<h2>Finding details</h2>
+<p class="muted">No findings above SAFE and no partial assessments.</p>
+
+
+
+<h2>Registry lookups</h2>
+<p>Mode: <b>fixture</b>.
+found: 4 · not_found: 1 · error: 0 · skipped: 0</p>
+
+<h2>What this tool cannot tell you</h2>
+<ul>
+<li>Public metadata cannot prove who owns a package name; ownership comes from your sentinel.toml.</li>
+<li>Name similarity is evidence of resemblance, not proof of malicious intent.</li>
+<li>The well-known-name list is a curated seed list, not a download-ranked source.</li>
+<li>Packages are never installed or executed, so malicious behaviour inside a package is out of scope.</li>
+</ul>
+</main>
+</body>
+</html>

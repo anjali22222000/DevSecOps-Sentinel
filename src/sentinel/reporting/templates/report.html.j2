@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel scan report</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--panel:#f6f8fa;
+--crit:#a40e26;--high:#bc4c00;--med:#9a6700;--safe:#1a7f37;--accent:#0969da}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;
+--panel:#161b22;--crit:#ff7b72;--high:#ffa657;--med:#e3b341;--safe:#56d364;--accent:#58a6ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.muted{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.banner{border:1px solid var(--line);border-left-width:4px;background:var(--panel);padding:10px 14px;margin:14px 0;border-radius:4px}
+.banner.blocked{border-left-color:var(--crit)}.banner.error{border-left-color:var(--high)}.banner.pass{border-left-color:var(--safe)}
+.banner.demo{border-left-color:var(--med)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:4px;padding:8px 12px;background:var(--panel)}
+.card b{display:block;font-size:20px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+.wrap{overflow-x:auto}
+.sev{font-weight:600;font-size:12px;white-space:nowrap}
+.sev::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:currentColor}
+.CRITICAL{color:var(--crit)}.HIGH{color:var(--high)}.MEDIUM{color:var(--med)}.SAFE{color:var(--safe)}
+details{border:1px solid var(--line);border-radius:4px;margin:8px 0;background:var(--bg)}
+summary{cursor:pointer;padding:8px 12px;background:var(--panel)}
+.body{padding:8px 12px}ul{margin:4px 0 8px 18px;padding:0}
+</style>
+</head>
+<body>
+<main>
+<h1>DevSecOps Sentinel scan report</h1>
+<div class="muted">Generated {{ r.metadata.generated_at }} · scanner {{ r.tool.version }} · scan root <span class="mono">{{ r.scan_root }}</span></div>
+
+{% if r.policy.exit_code == 1 %}
+<div class="banner blocked"><b>Pipeline blocked.</b> Policy: block at {{ r.policy.fail_on|upper }} or above. {{ r.policy.reasons|join("; ") }}.</div>
+{% elif r.policy.exit_code == 2 %}
+<div class="banner error"><b>Scanner error.</b> Evidence could not be fully collected, so this scan is not a pass. {{ r.policy.reasons|join("; ") }}.</div>
+{% else %}
+<div class="banner pass"><b>Passed.</b> {{ r.policy.reasons|join("; ") }}.</div>
+{% endif %}
+{% if r.metadata.demo_data %}
+<div class="banner demo"><b>Demo data.</b> Registry evidence came from a local fixture ({{ r.metadata.registry_source }}), not from live registries.</div>
+{% elif r.metadata.registry_mode == "off" %}
+<div class="banner demo"><b>Registry checks were not run.</b> Findings are partial: version and namespace evidence is unavailable.</div>
+{% endif %}
+
+<div class="cards">
+{% for sev in ["CRITICAL","HIGH","MEDIUM","SAFE"] %}
+<div class="card"><b class="{{ sev }}">{{ r.summary.findings_by_severity[sev] }}</b>{{ sev }}</div>
+{% endfor %}
+<div class="card"><b>{{ r.summary.dependencies_total }}</b>dependency entries</div>
+<div class="card"><b>{{ r.summary.packages_assessed }}</b>packages assessed</div>
+<div class="card"><b>{{ r.summary.partial_assessments }}</b>partial assessments</div>
+<div class="card"><b>{{ r.summary.scanner_errors }}</b>scanner errors</div>
+</div>
+
+<h2>Findings</h2>
+<div class="wrap"><table>
+<thead><tr><th>ID</th><th>Package / item</th><th>Ecosystem</th><th>Score</th><th>Severity</th><th>Assessment</th><th>Why</th></tr></thead>
+<tbody>
+{% for f in r.findings %}
+<tr><td class="mono">{{ f.id }}</td><td class="mono">{{ f.package or "configuration" }}</td><td>{{ f.ecosystem or "-" }}</td>
+<td>{{ "%g"|format(f.score) }}</td><td><span class="sev {{ f.severity }}">{{ f.severity }}</span></td><td>{{ f.assessment }}</td>
+<td>{{ f.reason }}</td></tr>
+{% else %}
+<tr><td colspan="7" class="muted">No findings. Either nothing was assessed or no registry-sourced dependencies were found.</td></tr>
+{% endfor %}
+</tbody></table></div>
+
+<h2>Finding details</h2>
+{% for f in r.findings if f.severity != "SAFE" or f.assessment == "partial" %}
+<details>
+<summary><span class="mono">{{ f.id }}</span> · {{ f.package or "configuration" }} · <span class="sev {{ f.severity }}">{{ f.severity }}</span> · score {{ "%g"|format(f.score) }}</summary>
+<div class="body">
+<p><b>{{ f.title }}</b></p>
+{% if f.indicators %}
+<div class="wrap"><table>
+<thead><tr><th>Indicator</th><th>Value (0-100)</th><th>Weight</th><th>Contribution</th><th>Basis</th></tr></thead>
+<tbody>
+{% for i in f.indicators %}
+<tr><td>{{ i.key }} · {{ i.label }}</td><td>{{ "%g"|format(i.value) if i.value is not none else "unavailable" }}</td><td>{{ i.weight }}</td><td>{{ "%.2f"|format(i.contribution) }}</td><td>{{ i.note }}</td></tr>
+{% endfor %}
+</tbody></table></div>
+<p>R = min(100, Wv·V + Ws·S + Wt·T) = <b>{{ "%g"|format(f.formula_score) }}</b>
+{% if f.floor is not none %}; minimum forced by rule: <b>{{ "%g"|format(f.floor) }}</b> ({{ f.floor_reason }}){% endif %}; final score <b>{{ "%g"|format(f.score) }}</b>.</p>
+{% else %}
+<p class="muted">Rule-based finding (not computed by the weighted formula). Score {{ "%g"|format(f.score) }}.</p>
+{% endif %}
+<p><b>Evidence</b></p><ul>{% for e in f.evidence %}<li>{{ e }}</li>{% endfor %}</ul>
+<p><b>Limitations</b></p><ul>{% for l in f.limitations %}<li>{{ l }}</li>{% else %}<li>None recorded.</li>{% endfor %}</ul>
+<p><b>Recommended investigation:</b> {{ f.recommendation }}</p>
+<p class="muted">Locations: {% for loc in f.locations %}<span class="mono">{{ loc.file }}{% if loc.line %}:{{ loc.line }}{% endif %}</span>{{ ", " if not loop.last }}{% endfor %}{% if f.rule_id %} · rule {{ f.rule_id }}{% endif %}</p>
+</div>
+</details>
+{% else %}
+<p class="muted">No findings above SAFE and no partial assessments.</p>
+{% endfor %}
+
+{% if r.errors or r.warnings %}
+<h2>Scanner errors and warnings</h2>
+<ul>
+{% for e in r.errors %}<li><b>error</b> · <span class="mono">{{ e.file }}</span>{% if e.line %}:{{ e.line }}{% endif %} · {{ e.message }}</li>{% endfor %}
+{% for w in r.warnings %}<li>warning · <span class="mono">{{ w.file }}</span>{% if w.line %}:{{ w.line }}{% endif %} · {{ w.message }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if r.registry_options %}
+<h2>Package-resolution options found</h2>
+<ul>{% for o in r.registry_options %}<li class="mono">{{ o.source_file }}:{{ o.line }} · {{ o.kind }} {{ o.value }}</li>{% endfor %}</ul>
+{% endif %}
+
+<h2>Registry lookups</h2>
+<p>Mode: <b>{{ r.metadata.registry_mode }}</b>.
+{% for k, n in r.summary.registry_lookups.items() %}{{ k }}: {{ n }}{{ " · " if not loop.last }}{% endfor %}</p>
+
+<h2>What this tool cannot tell you</h2>
+<ul>
+<li>Public metadata cannot prove who owns a package name; ownership comes from your sentinel.toml.</li>
+<li>Name similarity is evidence of resemblance, not proof of malicious intent.</li>
+<li>The well-known-name list is a curated seed list, not a download-ranked source.</li>
+<li>Packages are never installed or executed, so malicious behaviour inside a package is out of scope.</li>
+</ul>
+</main>
+</body>
+</html>

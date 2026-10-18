@@ -1,0 +1,8 @@
+{
+  "_default": "found",
+  "npm:expresss": {"status": "found", "latest_version": "1.0.0", "versions": ["1.0.0"]},
+  "npm:@acme-demo/auth": {"status": "found", "latest_version": "99.0.0", "versions": ["1.4.0", "99.0.0"]},
+  "npm:@acme-demo/billing": {"status": "not_found"},
+  "pypi:reqeusts": {"status": "found", "latest_version": "2.31.0", "versions": ["2.31.0"]},
+  "pypi:acme-demo-reports": {"status": "found", "latest_version": "3.0.0", "versions": ["3.0.0"]}
+}

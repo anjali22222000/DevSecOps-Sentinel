@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel dashboard</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--panel:#f6f8fa;--accent:#0969da;
+--crit:#a40e26;--high:#bc4c00;--med:#9a6700;--safe:#1a7f37}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;--panel:#161b22;
+--accent:#58a6ff;--crit:#ff7b72;--high:#ffa657;--med:#e3b341;--safe:#56d364}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header strong{font-size:15px}
+nav{display:flex;flex-wrap:wrap;gap:4px}
+nav a{padding:4px 10px;border-radius:4px;text-decoration:none;color:var(--fg)}
+nav a[aria-current="page"]{background:var(--bg);border:1px solid var(--line);font-weight:600}
+.spacer{flex:1}
+button,select,input[type=search]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:4px 10px}
+button{cursor:pointer}
+main{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:18px;margin:0 0 12px}h2{font-size:15px;margin:22px 0 8px}
+.muted{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.banner{border:1px solid var(--line);border-left-width:4px;background:var(--panel);padding:10px 14px;margin:0 0 12px;border-radius:4px}
+.banner.blocked{border-left-color:var(--crit)}.banner.error{border-left-color:var(--high)}
+.banner.pass{border-left-color:var(--safe)}.banner.note{border-left-color:var(--med)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:4px;padding:8px 12px;background:var(--panel)}
+.card b{display:block;font-size:20px}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+.sev{font-weight:600;font-size:12px;white-space:nowrap}
+.sev::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:currentColor}
+.CRITICAL{color:var(--crit)}.HIGH{color:var(--high)}.MEDIUM{color:var(--med)}.SAFE{color:var(--safe)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.empty{border:1px dashed var(--line);border-radius:4px;padding:28px 16px;text-align:center}
+ul{margin:4px 0 8px 18px;padding:0}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0}dt{color:var(--muted)}dd{margin:0}
+</style>
+</head>
+<body>
+<header>
+  <strong>DevSecOps Sentinel</strong>
+  <nav id="nav" aria-label="Sections"></nav>
+  <span class="spacer"></span>
+  <label class="muted" for="file">Open report.json</label>
+  <input id="file" type="file" accept="application/json,.json">
+</header>
+<main id="app" tabindex="-1"></main>
+
+<script>
+"use strict";
+// All report data is untrusted (package names come from the scanned repo), so it is only
+// ever inserted with textContent / createTextNode, never as HTML.
+let report = null;
+let loadError = null;
+
+function h(tag, attrs, ...kids) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") node.className = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) node.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c === null || c === undefined || c === false) continue;
+    node.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  return node;
+}
+const sev = s => h("span", {class: "sev " + s}, s);
+const num = n => (n === null || n === undefined) ? "unavailable" : String(Math.round(n * 100) / 100);
+const SEVS = ["CRITICAL", "HIGH", "MEDIUM", "SAFE"];
+
+function banners() {
+  const out = [];
+  const p = report.policy;
+  if (p.exit_code === 1) out.push(h("div", {class: "banner blocked"}, h("b", {}, "Pipeline blocked. "), p.reasons.join("; ") + "."));
+  else if (p.exit_code === 2) out.push(h("div", {class: "banner error"}, h("b", {}, "Scanner error. "), "Evidence was not fully collected, so this is not a pass. " + p.reasons.join("; ") + "."));
+  else out.push(h("div", {class: "banner pass"}, h("b", {}, "Passed. "), p.reasons.join("; ") + "."));
+  if (report.metadata.demo_data) out.push(h("div", {class: "banner note"}, h("b", {}, "Demo data. "), "Registry evidence came from a local fixture (" + report.metadata.registry_source + "), not live registries."));
+  else if (report.metadata.registry_mode === "off") out.push(h("div", {class: "banner note"}, h("b", {}, "Registry checks were not run. "), "Version and namespace evidence is unavailable, so assessments are partial."));
+  return out;
+}
+
+function viewOverview() {
+  const s = report.summary;
+  const top = report.findings.filter(f => f.severity !== "SAFE").slice(0, 5);
+  return [
+    h("h1", {}, "Overview"), ...banners(),
+    h("div", {class: "cards"},
+      SEVS.map(k => h("div", {class: "card"}, h("b", {class: k}, s.findings_by_severity[k]), k)),
+      h("div", {class: "card"}, h("b", {}, s.dependencies_total), "dependency entries"),
+      h("div", {class: "card"}, h("b", {}, s.packages_assessed), "packages assessed"),
+      h("div", {class: "card"}, h("b", {}, s.partial_assessments), "partial assessments"),
+      h("div", {class: "card"}, h("b", {}, s.scanner_errors), "scanner errors")),
+    h("p", {class: "muted"}, "Scanned " + report.scan_root + " at " + report.metadata.generated_at + " · registry mode: " + report.metadata.registry_mode + " · lookups: " + Object.entries(s.registry_lookups).map(([k, v]) => k + " " + v).join(", ")),
+    h("h2", {}, "Highest-risk findings"),
+    top.length ? h("ul", {}, top.map(f => h("li", {}, h("a", {href: "#finding/" + f.id}, f.package || "configuration"), " · ", sev(f.severity), " · score " + num(f.score) + " · " + f.reason)))
+               : h("p", {class: "muted"}, "No findings above SAFE."),
+    report.errors.length ? [h("h2", {}, "Scanner errors"), h("ul", {}, report.errors.map(e => h("li", {}, h("span", {class: "mono"}, e.file), " · " + e.message)))] : null,
+  ];
+}
+
+function viewResults() {
+  const sevSel = h("select", {id: "sev", "aria-label": "Filter by severity"}, h("option", {value: ""}, "All severities"), SEVS.map(k => h("option", {value: k}, k)));
+  const search = h("input", {type: "search", id: "q", placeholder: "Search package", "aria-label": "Search package"});
+  const tbody = h("tbody");
+  const render = () => {
+    tbody.replaceChildren();
+    const q = search.value.trim().toLowerCase();
+    const rows = report.findings.filter(f => (!sevSel.value || f.severity === sevSel.value) && (!q || (f.package || "configuration").toLowerCase().includes(q)));
+    if (!rows.length) tbody.append(h("tr", {}, h("td", {colspan: 7, class: "muted"}, "No findings match the filter.")));
+    for (const f of rows) {
+      tbody.append(h("tr", {},
+        h("td", {class: "mono"}, h("a", {href: "#finding/" + f.id}, f.package || "configuration")),
+        h("td", {}, f.ecosystem || "-"),
+        h("td", {}, f.reason),
+        h("td", {}, num(f.score)), h("td", {}, sev(f.severity)),
+        h("td", {}, f.assessment),
+        h("td", {}, f.recommendation.split(". ")[0] + ".")));
+    }
+  };
+  sevSel.addEventListener("change", render); search.addEventListener("input", render); render();
+  return [h("h1", {}, "Scan results"), h("div", {class: "controls"}, sevSel, search),
+    h("div", {class: "wrap"}, h("table", {},
+      h("caption", {class: "muted"}, report.findings.length + " finding(s), highest score first"),
+      h("thead", {}, h("tr", {}, ["Package", "Ecosystem", "Evidence", "Score", "Severity", "Assessment", "Investigate"].map(t => h("th", {scope: "col"}, t)))), tbody))];
+}
+
+function viewFinding(id) {
+  const f = report.findings.find(x => x.id === id);
+  if (!f) return [h("h1", {}, "Finding not found"), h("p", {}, h("a", {href: "#results"}, "Back to results"))];
+  const calc = f.indicators.length ? [
+    h("h2", {}, "Score calculation"),
+    h("div", {class: "wrap"}, h("table", {}, h("thead", {}, h("tr", {}, ["Indicator", "Value", "Weight", "Contribution", "Basis"].map(t => h("th", {scope: "col"}, t)))),
+      h("tbody", {}, f.indicators.map(i => h("tr", {}, h("td", {}, i.key + " · " + i.label), h("td", {}, num(i.value)), h("td", {}, i.weight), h("td", {}, i.contribution.toFixed(2)), h("td", {}, i.note)))))),
+    h("p", {}, "Weighted sum R = " + num(f.formula_score) + (f.floor !== null ? "; minimum forced by rule: " + num(f.floor) + " (" + f.floor_reason + ")" : "") + "; final score " + num(f.score) + "."),
+  ] : [h("p", {class: "muted"}, "Rule-based finding, not computed by the weighted formula. Score " + num(f.score) + ".")];
+  return [
+    h("p", {}, h("a", {href: "#results"}, "← Scan results")),
+    h("h1", {}, (f.package || "configuration") + " "), h("p", {}, sev(f.severity), " · score " + num(f.score) + " · " + f.assessment + " assessment" + (f.rule_id ? " · rule " + f.rule_id : "")),
+    h("p", {}, h("b", {}, f.title)), ...calc,
+    h("h2", {}, "Evidence"), h("ul", {}, f.evidence.map(e => h("li", {}, e))),
+    h("h2", {}, "Limitations"), h("ul", {}, f.limitations.length ? f.limitations.map(l => h("li", {}, l)) : [h("li", {}, "None recorded.")]),
+    h("h2", {}, "Recommended investigation"), h("p", {}, f.recommendation),
+    h("h2", {}, "Locations"), h("ul", {}, f.locations.map(l => h("li", {class: "mono"}, l.file + (l.line ? ":" + l.line : "")))),
+  ];
+}
+
+function list(items) { return items.length ? items.join(", ") : "none"; }
+function viewConfig() {
+  const c = report.config;
+  const dl = (rows) => h("dl", {}, rows.flatMap(([k, v]) => [h("dt", {}, k), h("dd", {class: "mono"}, String(v))]));
+  return [h("h1", {}, "Configuration"), h("p", {class: "muted"}, "Effective settings used for this scan (read-only view)."),
+    h("h2", {}, "Policy"), dl([["Block at severity", c.policy.fail_on], ["Block on incomplete evidence", c.policy.block_on_incomplete]]),
+    h("h2", {}, "Scoring weights (sum to 1)"), dl([["Wv (version)", c.weights.version], ["Ws (namespace)", c.weights.scope], ["Wt (similarity)", c.weights.similarity]]),
+    h("h2", {}, "Rule floors"), dl([["CRITICAL floor", c.scoring.floor_critical], ["HIGH floor", c.scoring.floor_high], ["MEDIUM floor", c.scoring.floor_medium], ["S when name is public", c.scoring.s_public_exists], ["S when name is unclaimed", c.scoring.s_unclaimed]]),
+    h("h2", {}, "Trusted internal namespaces"), dl([["NPM scopes", list(c.internal.npm_scopes)], ["NPM packages", list(c.internal.npm_packages)], ["NPM prefixes", list(c.internal.npm_prefixes)], ["PyPI packages", list(c.internal.pypi_packages)], ["PyPI prefixes", list(c.internal.pypi_prefixes)], ["Reserved on public registry", list(c.internal.owned_public)], ["Expected versions", list(Object.entries(c.internal.expected_versions).map(([k, v]) => k + "=" + v))]]),
+    h("h2", {}, "Similarity"), dl([["Algorithm", c.similarity.algorithm], ["Min name length", c.similarity.min_length], ["Max edits (short / long names)", c.similarity.max_distance_short + " / " + c.similarity.max_distance_long], ["High-similarity threshold", c.similarity.high_similarity + "%"], ["Allowlist", list(c.similarity.allowlist)]]),
+    h("h2", {}, "Privacy"), dl([["Send internal names to public registries", c.privacy.query_internal_names]]),
+  ];
+}
+
+function viewReports() {
+  const download = h("button", {type: "button", onclick: () => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type: "application/json"}));
+    const a = h("a", {href: url, download: "report.json"}); a.click(); URL.revokeObjectURL(url);
+  }}, "Download loaded report.json");
+  return [h("h1", {}, "Reports"),
+    h("p", {class: "muted"}, "These links work when this page is served from the same folder as the reports (for example reports/dashboard.html)."),
+    h("ul", {}, [["report.html", "Readable audit report"], ["report.sarif", "SARIF 2.1.0 for GitHub code scanning"], ["report.json", "Full machine-readable results"]].map(([f, d]) => h("li", {}, h("a", {href: f}, f), " · " + d))),
+    download];
+}
+
+function viewEmpty() {
+  return [h("h1", {}, "No scan loaded"),
+    h("div", {class: "empty"},
+      loadError ? h("p", {}, h("b", {}, "Could not read the report: "), loadError) : null,
+      h("p", {}, "Run a scan, then open its report.json here."),
+      h("p", {class: "mono"}, "sentinel scan <path> --output-dir reports"),
+      h("p", {class: "muted"}, "Use “Open report.json” above, or serve the reports folder (python -m http.server) and open reports/dashboard.html."))];
+}
+
+const ROUTES = [["overview", "Overview"], ["results", "Scan results"], ["config", "Configuration"], ["reports", "Reports"]];
+function route() {
+  const [name, arg] = (location.hash.slice(1) || "overview").split("/");
+  const nav = document.getElementById("nav"); nav.replaceChildren();
+  for (const [r, label] of ROUTES) {
+    const current = r === name || (r === "results" && name === "finding");
+    nav.append(h("a", {href: "#" + r, "aria-current": current ? "page" : false}, label));
+  }
+  let view;
+  if (!report) view = viewEmpty();
+  else if (name === "results") view = viewResults();
+  else if (name === "finding") view = viewFinding(arg);
+  else if (name === "config") view = viewConfig();
+  else if (name === "reports") view = viewReports();
+  else view = viewOverview();
+  document.getElementById("app").replaceChildren(...view.flat().filter(Boolean));
+}
+
+function load(data) {
+  try {
+    if (!data || typeof data.schema_version !== "string" || !data.schema_version.startsWith("1.")) throw new Error("not a Sentinel report (unsupported schema_version)");
+    for (const k of ["summary", "policy", "config", "findings", "metadata"]) if (!(k in data)) throw new Error("missing field: " + k);
+    report = data; loadError = null;
+  } catch (e) { report = null; loadError = e.message; }
+  route();
+}
+
+document.getElementById("file").addEventListener("change", async ev => {
+  const file = ev.target.files[0]; if (!file) return;
+  try { load(JSON.parse(await file.text())); } catch (e) { report = null; loadError = "invalid JSON"; route(); }
+});
+window.addEventListener("hashchange", route);
+route();
+fetch("report.json").then(r => r.ok ? r.json() : Promise.reject()).then(load).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "DevSecOps Sentinel",
+          "version": "0.3.0",
+          "semanticVersion": "0.3.0",
+          "rules": [
+            {
+              "id": "SENT-DC-001",
+              "name": "InternalNamePubliclyExposed",
+              "shortDescription": {
+                "text": "Internal package name is exposed on a public registry"
+              },
+              "fullDescription": {
+                "text": "A package you declared as internal exists on the public registry with a higher version than expected, or its lockfile entry was resolved from a public registry. A resolver that prefers the public source can install attacker-controlled code."
+              },
+              "help": {
+                "text": "A package you declared as internal exists on the public registry with a higher version than expected, or its lockfile entry was resolved from a public registry. A resolver that prefers the public source can install attacker-controlled code."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "supply-chain"
+                ],
+                "security-severity": "9.5"
+              }
+            },
+            {
+              "id": "SENT-DC-002",
+              "name": "UnregisteredDependencyName",
+              "shortDescription": {
+                "text": "Dependency name is not registered on the public registry"
+              },
+              "fullDescription": {
+                "text": "The name does not exist publicly and is not declared internal. If it is a private package, anyone could register that name publicly (dependency confusion). If it is a typo, the install will fail or resolve unexpectedly. Declare internal names in sentinel.toml and reserve them on the public registry."
+              },
+              "help": {
+                "text": "The name does not exist publicly and is not declared internal. If it is a private package, anyone could register that name publicly (dependency confusion). If it is a typo, the install will fail or resolve unexpectedly. Declare internal names in sentinel.toml and reserve them on the public registry."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "supply-chain"
+                ],
+                "security-severity": "5.0"
+              }
+            },
+            {
+              "id": "SENT-TS-001",
+              "name": "PossibleTyposquat",
+              "shortDescription": {
+                "text": "Package name closely resembles a well-known package"
+              },
+              "fullDescription": {
+                "text": "The name is within a small edit distance of a popular package. Similarity is evidence of resemblance, not proof of malicious intent: verify the package."
+              },
+              "help": {
+                "text": "The name is within a small edit distance of a popular package. Similarity is evidence of resemblance, not proof of malicious intent: verify the package."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "supply-chain"
+                ],
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "SENT-CFG-001",
+              "name": "ExtraIndexUrl",
+              "shortDescription": {
+                "text": "Extra package index configured"
+              },
+              "fullDescription": {
+                "text": "pip treats all configured indexes as equal and installs the highest version found, which is the classic dependency-confusion misconfiguration."
+              },
+              "help": {
+                "text": "pip treats all configured indexes as equal and installs the highest version found, which is the classic dependency-confusion misconfiguration."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "supply-chain"
+                ],
+                "security-severity": "5.5"
+              }
+            },
+            {
+              "id": "SENT-CFG-002",
+              "name": "TlsVerificationDisabled",
+              "shortDescription": {
+                "text": "TLS verification disabled for a package host"
+              },
+              "fullDescription": {
+                "text": "--trusted-host tells pip to skip TLS verification for that host, allowing on-path tampering with downloaded packages."
+              },
+              "help": {
+                "text": "--trusted-host tells pip to skip TLS verification for that host, allowing on-path tampering with downloaded packages."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "supply-chain"
+                ],
+                "security-severity": "5.0"
+              }
+            },
+            {
+              "id": "SENT-CFG-003",
+              "name": "InsecureIndexUrl",
+              "shortDescription": {
+                "text": "Package index uses plain HTTP"
+              },
+              "fullDescription": {
+                "text": "Packages fetched over plain HTTP can be modified in transit."
+              },
+              "help": {
+                "text": "Packages fetched over plain HTTP can be modified in transit."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "supply-chain"
+                ],
+                "security-severity": "7.5"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SENT-DC-001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Internal package name is exposed on a public registry: @acme-demo/auth scored 80 (CRITICAL). public registry has 99.0.0, higher than expected internal 1.4.0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable-demo/package.json",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "sentinelFingerprint/v1": "5708952b9ad4f9518db127ee27de4bb8"
+          },
+          "properties": {
+            "finding_id": "F001",
+            "severity": "CRITICAL",
+            "score": 80.0,
+            "assessment": "complete",
+            "security-severity": "9.5",
+            "package": "@acme-demo/auth",
+            "ecosystem": "npm"
+          }
+        },
+        {
+          "ruleId": "SENT-DC-001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Internal package name is exposed on a public registry: @acme-demo/billing scored 80 (CRITICAL). internal package was resolved from public registry host registry.npmjs.org"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable-demo/package.json",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "sentinelFingerprint/v1": "da8ef19c822de05dfdebe42e63648163"
+          },
+          "properties": {
+            "finding_id": "F002",
+            "severity": "CRITICAL",
+            "score": 80.0,
+            "assessment": "complete",
+            "security-severity": "9.5",
+            "package": "@acme-demo/billing",
+            "ecosystem": "npm"
+          }
+        },
+        {
+          "ruleId": "SENT-CFG-001",
+          "ruleIndex": 3,
+          "level": "error",
+          "message": {
+            "text": "Extra package index configured: configuration scored 65 (HIGH). pip merges all indexes and installs the highest version it finds; internal PyPI packages are declared in sentinel.toml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable-demo/requirements.txt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "sentinelFingerprint/v1": "f5b8cd0806e660a013dcbbe717a0df12"
+          },
+          "properties": {
+            "finding_id": "F003",
+            "severity": "HIGH",
+            "score": 65.0,
+            "assessment": "complete",
+            "security-severity": "8.0"
+          }
+        },
+        {
+          "ruleId": "SENT-TS-001",
+          "ruleIndex": 2,
+          "level": "error",
+          "message": {
+            "text": "Package name closely resembles a well-known package: expresss scored 60 (HIGH). name resembles 'express' (87.5% similar)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable-demo/package.json",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "sentinelFingerprint/v1": "447cd8e03a27899ad6fd063628a39ce7"
+          },
+          "properties": {
+            "finding_id": "F004",
+            "severity": "HIGH",
+            "score": 60.0,
+            "assessment": "complete",
+            "security-severity": "8.0",
+            "package": "expresss",
+            "ecosystem": "npm"
+          }
+        },
+        {
+          "ruleId": "SENT-TS-001",
+          "ruleIndex": 2,
+          "level": "error",
+          "message": {
+            "text": "Package name closely resembles a well-known package: reqeusts scored 60 (HIGH). name resembles 'requests' (87.5% similar)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable-demo/requirements.txt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "sentinelFingerprint/v1": "5d2ab5865494f5d5d42f66cc994837c6"
+          },
+          "properties": {
+            "finding_id": "F005",
+            "severity": "HIGH",
+            "score": 60.0,
+            "assessment": "complete",
+            "security-severity": "8.0",
+            "package": "reqeusts",
+            "ecosystem": "pypi"
+          }
+        },
+        {
+          "ruleId": "SENT-DC-001",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Internal package name is exposed on a public registry: acme-demo-reports scored 30 (MEDIUM). internal name is registered on the public registry and is not declared as owned by you"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "examples/vulnerable-demo/requirements.txt",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "sentinelFingerprint/v1": "7e56854d43d9d636b367a66e0ec2c2e6"
+          },
+          "properties": {
+            "finding_id": "F006",
+            "severity": "MEDIUM",
+            "score": 30.0,
+            "assessment": "complete",
+            "security-severity": "5.0",
+            "package": "acme-demo-reports",
+            "ecosystem": "pypi"
+          }
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": []
+        }
+      ]
+    }
+  ]
+}

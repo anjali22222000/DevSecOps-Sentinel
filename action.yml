@@ -1,0 +1,102 @@
+name: DevSecOps Sentinel dependency gate
+description: Scan dependency manifests for dependency-confusion and typosquatting risks BEFORE any install step.
+author: DevSecOps Sentinel
+inputs:
+  path:
+    description: Directory containing package.json / requirements.txt / lockfiles
+    default: "."
+  config:
+    description: Path to sentinel.toml (default is <path>/sentinel.toml if present)
+    default: ""
+  fail-on:
+    description: Override policy.fail_on (critical, high, medium, never)
+    default: ""
+  registry:
+    description: "true = query public registries (sends package names to npmjs.org and pypi.org)"
+    default: "true"
+  registry-fixture:
+    description: Local registry fixture file (demos and tests). Overrides `registry`.
+    default: ""
+  output-dir:
+    description: Directory for report.json, report.html, report.sarif and dashboard.html
+    default: sentinel-reports
+  artifact-name:
+    description: Name of the uploaded report artifact (must be unique per job)
+    default: sentinel-reports
+  upload-sarif:
+    description: "true = upload report.sarif to GitHub code scanning (caller job needs security-events: write)"
+    default: "false"
+  python-version:
+    description: Python version used to run the scanner
+    default: "3.12"
+outputs:
+  exit-code:
+    description: "0 = pass, 1 = policy block, 2 = scanner error"
+    value: ${{ steps.scan.outputs.exit_code }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    # The scanner's own dependencies are pinned and installed here. The scanned project's
+    # dependencies (npm ci / pip install) are NOT installed by this action.
+    - name: Install scanner (not the project's dependencies)
+      shell: bash
+      run: |
+        python -m pip install --disable-pip-version-check --no-input -r "$GITHUB_ACTION_PATH/requirements-scanner.txt"
+        python -m pip install --disable-pip-version-check --no-input --no-deps "$GITHUB_ACTION_PATH"
+
+    - name: Scan dependencies
+      id: scan
+      shell: bash
+      env:
+        SENTINEL_PATH: ${{ inputs.path }}
+        SENTINEL_CONFIG: ${{ inputs.config }}
+        SENTINEL_FAIL_ON: ${{ inputs.fail-on }}
+        SENTINEL_REGISTRY: ${{ inputs.registry }}
+        SENTINEL_FIXTURE: ${{ inputs.registry-fixture }}
+        SENTINEL_OUT: ${{ inputs.output-dir }}
+      run: |
+        # Inputs reach the shell only through environment variables, never through inline expressions.
+        args=(scan "$SENTINEL_PATH" --output-dir "$SENTINEL_OUT")
+        [ -n "$SENTINEL_CONFIG" ] && args+=(--config "$SENTINEL_CONFIG")
+        [ -n "$SENTINEL_FAIL_ON" ] && args+=(--fail-on "$SENTINEL_FAIL_ON")
+        if [ -n "$SENTINEL_FIXTURE" ]; then args+=(--registry-fixture "$SENTINEL_FIXTURE")
+        elif [ "$SENTINEL_REGISTRY" = "true" ]; then args+=(--registry); fi
+        set +e
+        sentinel "${args[@]}"
+        code=$?
+        set -e
+        echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+        # the verdict is enforced in the last step, after reports are uploaded
+        exit 0
+
+    - name: Upload reports
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.output-dir }}
+        if-no-files-found: warn
+
+    - name: Upload SARIF to code scanning
+      if: ${{ always() && inputs.upload-sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ inputs.output-dir }}/report.sarif
+        category: devsecops-sentinel
+
+    - name: Enforce gate
+      shell: bash
+      env:
+        CODE: ${{ steps.scan.outputs.exit_code }}
+      run: |
+        case "$CODE" in
+          0) echo "Sentinel gate passed." ;;
+          1) echo "::error title=Sentinel policy gate::Findings reached the blocking threshold. See the uploaded reports."; exit 1 ;;
+          2) echo "::error title=Sentinel scanner error::The scan could not be completed (input, config or registry failure). This is NOT a pass."; exit 2 ;;
+          *) echo "::error title=Sentinel crashed::Unexpected exit code '$CODE'."; exit 3 ;;
+        esac

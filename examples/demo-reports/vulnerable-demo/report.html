@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel scan report</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--panel:#f6f8fa;
+--crit:#a40e26;--high:#bc4c00;--med:#9a6700;--safe:#1a7f37;--accent:#0969da}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;
+--panel:#161b22;--crit:#ff7b72;--high:#ffa657;--med:#e3b341;--safe:#56d364;--accent:#58a6ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.muted{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.banner{border:1px solid var(--line);border-left-width:4px;background:var(--panel);padding:10px 14px;margin:14px 0;border-radius:4px}
+.banner.blocked{border-left-color:var(--crit)}.banner.error{border-left-color:var(--high)}.banner.pass{border-left-color:var(--safe)}
+.banner.demo{border-left-color:var(--med)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.card{border:1px solid var(--line);border-radius:4px;padding:8px 12px;background:var(--panel)}
+.card b{display:block;font-size:20px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+.wrap{overflow-x:auto}
+.sev{font-weight:600;font-size:12px;white-space:nowrap}
+.sev::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:currentColor}
+.CRITICAL{color:var(--crit)}.HIGH{color:var(--high)}.MEDIUM{color:var(--med)}.SAFE{color:var(--safe)}
+details{border:1px solid var(--line);border-radius:4px;margin:8px 0;background:var(--bg)}
+summary{cursor:pointer;padding:8px 12px;background:var(--panel)}
+.body{padding:8px 12px}ul{margin:4px 0 8px 18px;padding:0}
+</style>
+</head>
+<body>
+<main>
+<h1>DevSecOps Sentinel scan report</h1>
+<div class="muted">Generated 2026-10-17T16:06:26+00:00 · scanner 0.3.0 · scan root <span class="mono">examples/vulnerable-demo</span></div>
+
+<div class="banner blocked"><b>Pipeline blocked.</b> Policy: block at HIGH or above. 5 finding(s) at or above HIGH.</div>
+<div class="banner demo"><b>Demo data.</b> Registry evidence came from a local fixture (registry-fixture.json), not from live registries.</div>
+
+<div class="cards">
+<div class="card"><b class="CRITICAL">2</b>CRITICAL</div>
+<div class="card"><b class="HIGH">3</b>HIGH</div>
+<div class="card"><b class="MEDIUM">1</b>MEDIUM</div>
+<div class="card"><b class="SAFE">2</b>SAFE</div>
+<div class="card"><b>11</b>dependency entries</div>
+<div class="card"><b>7</b>packages assessed</div>
+<div class="card"><b>0</b>partial assessments</div>
+<div class="card"><b>0</b>scanner errors</div>
+</div>
+
+<h2>Findings</h2>
+<div class="wrap"><table>
+<thead><tr><th>ID</th><th>Package / item</th><th>Ecosystem</th><th>Score</th><th>Severity</th><th>Assessment</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td class="mono">F001</td><td class="mono">@acme-demo/auth</td><td>npm</td>
+<td>80</td><td><span class="sev CRITICAL">CRITICAL</span></td><td>complete</td>
+<td>public registry has 99.0.0, higher than expected internal 1.4.0</td></tr>
+<tr><td class="mono">F002</td><td class="mono">@acme-demo/billing</td><td>npm</td>
+<td>80</td><td><span class="sev CRITICAL">CRITICAL</span></td><td>complete</td>
+<td>internal package was resolved from public registry host registry.npmjs.org</td></tr>
+<tr><td class="mono">F003</td><td class="mono">configuration</td><td>pypi</td>
+<td>65</td><td><span class="sev HIGH">HIGH</span></td><td>complete</td>
+<td>pip merges all indexes and installs the highest version it finds; internal PyPI packages are declared in sentinel.toml</td></tr>
+<tr><td class="mono">F004</td><td class="mono">expresss</td><td>npm</td>
+<td>60</td><td><span class="sev HIGH">HIGH</span></td><td>complete</td>
+<td>name resembles &#39;express&#39; (87.5% similar)</td></tr>
+<tr><td class="mono">F005</td><td class="mono">reqeusts</td><td>pypi</td>
+<td>60</td><td><span class="sev HIGH">HIGH</span></td><td>complete</td>
+<td>name resembles &#39;requests&#39; (87.5% similar)</td></tr>
+<tr><td class="mono">F006</td><td class="mono">acme-demo-reports</td><td>pypi</td>
+<td>30</td><td><span class="sev MEDIUM">MEDIUM</span></td><td>complete</td>
+<td>internal name is registered on the public registry and is not declared as owned by you</td></tr>
+<tr><td class="mono">F007</td><td class="mono">express</td><td>npm</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+<tr><td class="mono">F008</td><td class="mono">flask</td><td>pypi</td>
+<td>0</td><td><span class="sev SAFE">SAFE</span></td><td>complete</td>
+<td>No risk indicators found</td></tr>
+</tbody></table></div>
+
+<h2>Finding details</h2>
+<details>
+<summary><span class="mono">F001</span> · @acme-demo/auth · <span class="sev CRITICAL">CRITICAL</span> · score 80</summary>
+<div class="body">
+<p><b>Internal package name is exposed on a public registry</b></p>
+<div class="wrap"><table>
+<thead><tr><th>Indicator</th><th>Value (0-100)</th><th>Weight</th><th>Contribution</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>V · Version mismatch</td><td>100</td><td>0.4</td><td>40.00</td><td>highest public version 99.0.0 &gt; expected 1.4.0 (from sentinel.toml)</td></tr>
+<tr><td>S · Unclaimed / unverified namespace</td><td>100</td><td>0.3</td><td>30.00</td><td>internal name is registered on the public registry and is not declared as owned by you</td></tr>
+<tr><td>T · Name similarity</td><td>0</td><td>0.3</td><td>0.00</td><td>not applicable: internal names are not compared</td></tr>
+</tbody></table></div>
+<p>R = min(100, Wv·V + Ws·S + Wt·T) = <b>70</b>
+; minimum forced by rule: <b>80</b> (public registry has 99.0.0, higher than expected internal 1.4.0); final score <b>80</b>.</p>
+<p><b>Evidence</b></p><ul><li>Declared in package.json:8 as 1.4.0</li><li>Declared in package-lock.json:10 as 1.4.0, resolved from https://npm.acme-demo.example/@acme-demo/auth/-/auth-1.4.0.tgz</li><li>Public registry: found; latest 99.0.0; 2 published version(s)</li><li>Declared internal in sentinel.toml</li></ul>
+<p><b>Limitations</b></p><ul><li>Public metadata cannot prove who owns a name; ownership comes from sentinel.toml.</li></ul>
+<p><b>Recommended investigation:</b> Treat as a possible dependency-confusion exposure: confirm which registry served this package, pin the internal version with integrity hashes, make the package manager resolve this name only from your private registry, and reserve the name publicly.</p>
+<p class="muted">Locations: <span class="mono">package.json:8</span>, <span class="mono">package-lock.json:10</span> · rule SENT-DC-001</p>
+</div>
+</details>
+<details>
+<summary><span class="mono">F002</span> · @acme-demo/billing · <span class="sev CRITICAL">CRITICAL</span> · score 80</summary>
+<div class="body">
+<p><b>Internal package name is exposed on a public registry</b></p>
+<div class="wrap"><table>
+<thead><tr><th>Indicator</th><th>Value (0-100)</th><th>Weight</th><th>Contribution</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>V · Version mismatch</td><td>0</td><td>0.4</td><td>0.00</td><td>no public package exists, so there is no higher public version</td></tr>
+<tr><td>S · Unclaimed / unverified namespace</td><td>70</td><td>0.3</td><td>21.00</td><td>no public package with this name; cannot confirm the name or scope is reserved by you</td></tr>
+<tr><td>T · Name similarity</td><td>0</td><td>0.3</td><td>0.00</td><td>not applicable: internal names are not compared</td></tr>
+</tbody></table></div>
+<p>R = min(100, Wv·V + Ws·S + Wt·T) = <b>21</b>
+; minimum forced by rule: <b>80</b> (internal package was resolved from public registry host registry.npmjs.org); final score <b>80</b>.</p>
+<p><b>Evidence</b></p><ul><li>Declared in package.json:9 as 2.1.0</li><li>Declared in package-lock.json:11 as 2.1.0, resolved from https://registry.npmjs.org/@acme-demo/billing/-/billing-2.1.0.tgz</li><li>Public registry: no package with this name (HTTP 404)</li><li>Declared internal in sentinel.toml</li></ul>
+<p><b>Limitations</b></p><ul><li>A 404 also occurs for private packages in a scope you own; public metadata cannot distinguish that from an unclaimed name.</li><li>Public metadata cannot prove who owns a name; ownership comes from sentinel.toml.</li></ul>
+<p><b>Recommended investigation:</b> Treat as a possible dependency-confusion exposure: confirm which registry served this package, pin the internal version with integrity hashes, make the package manager resolve this name only from your private registry, and reserve the name publicly.</p>
+<p class="muted">Locations: <span class="mono">package.json:9</span>, <span class="mono">package-lock.json:11</span> · rule SENT-DC-001</p>
+</div>
+</details>
+<details>
+<summary><span class="mono">F003</span> · configuration · <span class="sev HIGH">HIGH</span> · score 65</summary>
+<div class="body">
+<p><b>Extra package index configured</b></p>
+<p class="muted">Rule-based finding (not computed by the weighted formula). Score 65.</p>
+<p><b>Evidence</b></p><ul><li>extra-index-url https://pypi.acme-demo.example/simple (requirements.txt:1)</li><li>pip merges all indexes and installs the highest version it finds; internal PyPI packages are declared in sentinel.toml</li></ul>
+<p><b>Limitations</b></p><ul><li>Severity is rule-based, not computed by the weighted formula.</li><li>pip.conf, environment variables and .npmrc are not scanned.</li></ul>
+<p><b>Recommended investigation:</b> Use a single --index-url (a proxy that serves internal and mirrored public packages) or pin hashes with --require-hashes.</p>
+<p class="muted">Locations: <span class="mono">requirements.txt:1</span> · rule SENT-CFG-001</p>
+</div>
+</details>
+<details>
+<summary><span class="mono">F004</span> · expresss · <span class="sev HIGH">HIGH</span> · score 60</summary>
+<div class="body">
+<p><b>Package name closely resembles a well-known package</b></p>
+<div class="wrap"><table>
+<thead><tr><th>Indicator</th><th>Value (0-100)</th><th>Weight</th><th>Contribution</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>V · Version mismatch</td><td>0</td><td>0.4</td><td>0.00</td><td>not applicable: package is not declared internal</td></tr>
+<tr><td>S · Unclaimed / unverified namespace</td><td>0</td><td>0.3</td><td>0.00</td><td>name exists on the public registry</td></tr>
+<tr><td>T · Name similarity</td><td>87.5</td><td>0.3</td><td>26.25</td><td>closest well-known name &#39;express&#39;: Damerau-Levenshtein distance 1, similarity 87.5%</td></tr>
+</tbody></table></div>
+<p>R = min(100, Wv·V + Ws·S + Wt·T) = <b>26.25</b>
+; minimum forced by rule: <b>60</b> (name resembles &#39;express&#39; (87.5% similar)); final score <b>60</b>.</p>
+<p><b>Evidence</b></p><ul><li>Declared in package.json:7 as 1.0.0</li><li>Declared in package-lock.json:9 as 1.0.0, resolved from https://registry.npmjs.org/expresss/-/expresss-1.0.0.tgz</li><li>Public registry: found; latest 1.0.0; 1 published version(s)</li><li>Resembles well-known package &#39;express&#39; (distance 1, similarity 87.5%)</li></ul>
+<p><b>Limitations</b></p><ul><li>String similarity is evidence of resemblance, not proof of malicious intent.</li></ul>
+<p><b>Recommended investigation:</b> Compare with &#39;express&#39;. Check the publisher, repository link, creation date and download counts before installing. If it is legitimate, add it to similarity.allowlist.</p>
+<p class="muted">Locations: <span class="mono">package.json:7</span>, <span class="mono">package-lock.json:9</span> · rule SENT-TS-001</p>
+</div>
+</details>
+<details>
+<summary><span class="mono">F005</span> · reqeusts · <span class="sev HIGH">HIGH</span> · score 60</summary>
+<div class="body">
+<p><b>Package name closely resembles a well-known package</b></p>
+<div class="wrap"><table>
+<thead><tr><th>Indicator</th><th>Value (0-100)</th><th>Weight</th><th>Contribution</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>V · Version mismatch</td><td>0</td><td>0.4</td><td>0.00</td><td>not applicable: package is not declared internal</td></tr>
+<tr><td>S · Unclaimed / unverified namespace</td><td>0</td><td>0.3</td><td>0.00</td><td>name exists on the public registry</td></tr>
+<tr><td>T · Name similarity</td><td>87.5</td><td>0.3</td><td>26.25</td><td>closest well-known name &#39;requests&#39;: Damerau-Levenshtein distance 1, similarity 87.5%</td></tr>
+</tbody></table></div>
+<p>R = min(100, Wv·V + Ws·S + Wt·T) = <b>26.25</b>
+; minimum forced by rule: <b>60</b> (name resembles &#39;requests&#39; (87.5% similar)); final score <b>60</b>.</p>
+<p><b>Evidence</b></p><ul><li>Declared in requirements.txt:2 as 2.31.0</li><li>Public registry: found; latest 2.31.0; 1 published version(s)</li><li>Resembles well-known package &#39;requests&#39; (distance 1, similarity 87.5%)</li></ul>
+<p><b>Limitations</b></p><ul><li>String similarity is evidence of resemblance, not proof of malicious intent.</li></ul>
+<p><b>Recommended investigation:</b> Compare with &#39;requests&#39;. Check the publisher, repository link, creation date and download counts before installing. If it is legitimate, add it to similarity.allowlist.</p>
+<p class="muted">Locations: <span class="mono">requirements.txt:2</span> · rule SENT-TS-001</p>
+</div>
+</details>
+<details>
+<summary><span class="mono">F006</span> · acme-demo-reports · <span class="sev MEDIUM">MEDIUM</span> · score 30</summary>
+<div class="body">
+<p><b>Internal package name is exposed on a public registry</b></p>
+<div class="wrap"><table>
+<thead><tr><th>Indicator</th><th>Value (0-100)</th><th>Weight</th><th>Contribution</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>V · Version mismatch</td><td>0</td><td>0.4</td><td>0.00</td><td>highest public version 3.0.0 &lt;= expected 3.0.0 (from sentinel.toml)</td></tr>
+<tr><td>S · Unclaimed / unverified namespace</td><td>100</td><td>0.3</td><td>30.00</td><td>internal name is registered on the public registry and is not declared as owned by you</td></tr>
+<tr><td>T · Name similarity</td><td>0</td><td>0.3</td><td>0.00</td><td>not applicable: internal names are not compared</td></tr>
+</tbody></table></div>
+<p>R = min(100, Wv·V + Ws·S + Wt·T) = <b>30</b>
+; final score <b>30</b>.</p>
+<p><b>Evidence</b></p><ul><li>Declared in requirements.txt:3 as 3.0.0</li><li>Public registry: found; latest 3.0.0; 1 published version(s)</li><li>Declared internal in sentinel.toml</li></ul>
+<p><b>Limitations</b></p><ul><li>Public metadata cannot prove who owns a name; ownership comes from sentinel.toml.</li></ul>
+<p><b>Recommended investigation:</b> Treat as a possible dependency-confusion exposure: confirm which registry served this package, pin the internal version with integrity hashes, make the package manager resolve this name only from your private registry, and reserve the name publicly.</p>
+<p class="muted">Locations: <span class="mono">requirements.txt:3</span> · rule SENT-DC-001</p>
+</div>
+</details>
+
+
+<h2>Package-resolution options found</h2>
+<ul><li class="mono">requirements.txt:1 · extra-index-url https://pypi.acme-demo.example/simple</li></ul>
+
+<h2>Registry lookups</h2>
+<p>Mode: <b>fixture</b>.
+found: 6 · not_found: 1 · error: 0 · skipped: 0</p>
+
+<h2>What this tool cannot tell you</h2>
+<ul>
+<li>Public metadata cannot prove who owns a package name; ownership comes from your sentinel.toml.</li>
+<li>Name similarity is evidence of resemblance, not proof of malicious intent.</li>
+<li>The well-known-name list is a curated seed list, not a download-ranked source.</li>
+<li>Packages are never installed or executed, so malicious behaviour inside a package is out of scope.</li>
+</ul>
+</main>
+</body>
+</html>

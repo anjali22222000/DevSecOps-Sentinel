@@ -1,0 +1,11 @@
+{
+  "name": "vulnerable-demo-app",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "express": "4.18.2",
+    "expresss": "1.0.0",
+    "@acme-demo/auth": "1.4.0",
+    "@acme-demo/billing": "2.1.0"
+  }
+}

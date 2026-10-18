@@ -13,6 +13,6 @@ MarkupSafe==3.0.3
 multidict==6.9.1
 packaging==26.3
 propcache==0.5.4
-tomli==2.4.1; python_version < "3.11"
+tomli==2.5.0; python_version < "3.11"
 typing_extensions==4.16.0
 yarl==1.25.1
